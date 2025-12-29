@@ -6,10 +6,10 @@ This plugin allows you to use Microsoft Entra as an authentication source for us
 
 To allow this plugin to work, you will have to create an 'App Registration' on Microsoft Entra, with the following API Permissions:
 
-'email
+`email
 openid
 profile
-User.Read'
+User.Read`
 
 Remembering to 'Grant Admin Consent' for your Tenant so users aren't asked for permission when they first login to use the app. 
 
@@ -34,7 +34,7 @@ If you wish to make this the only available login option, you can enable the 'di
 As I did not want to mess with the code of the main plugin, this plugin uses its own login handler, therefore it won't create a 'Sign in with Microsoft' button on the main login page like the other AVideo created Login plugins do when they're enabled. Please feel free to use the HTML code below to create your own login button, i suggest in the 'messageToAppearBelowLoginBox' setting of the 'CustomizeUser' plugin of AVideo.
 
 
-'<div style="text-align:center;">
+`<div style="text-align:center;">
   <a id="entra-login-btn"
      href="https://youravideo.com/plugin/LoginEntra/login.json.php"
      style="display:inline-flex;align-items:center;gap:14px;
@@ -63,4 +63,4 @@ As I did not want to mess with the code of the main plugin, this plugin uses its
     var target = redirectUri ? redirectUri : url.toString();
     btn.setAttribute('href', base + '?redirectUrl=' + encodeURIComponent(target));
   })();
-</script>'
+</script>`
