@@ -6,10 +6,12 @@ This plugin allows you to use Microsoft Entra as an authentication source for us
 
 To allow this plugin to work, you will have to create an 'App Registration' on Microsoft Entra, with the following API Permissions:
 
-```email
+```
+email
 openid
 profile
-User.Read````
+User.Read
+```
 
 Remembering to 'Grant Admin Consent' for your Tenant so users aren't asked for permission when they first login to use the app. 
 
@@ -64,4 +66,5 @@ As I did not want to mess with the code of the main plugin, this plugin uses its
     var target = redirectUri ? redirectUri : url.toString();
     btn.setAttribute('href', base + '?redirectUrl=' + encodeURIComponent(target));
   })();
-</script>```
+</script>
+```
