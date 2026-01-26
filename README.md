@@ -1,6 +1,13 @@
 # LoginEntra - Microsoft Entra Authentication Plugin for AVideo Platform
 
+
+## Donations
+
+While i will always provide my software for free, donations are extremely helpful for allowing me to continue making these apps, so any donation would be appreciated:
+
 [![Donate with PayPal to help me continue developing these apps!](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=5TRANVZF49AN6&no_recurring=0&item_name=Thank+you+for+any+donations%21+It+will+help+me+put+money+into+the+tools+I+use+to+develop+my+apps+and+services.&currency_code=GBP)
+
+# Introduction
 
 This plugin allows you to use Microsoft Entra as an authentication source for users to login to the [AVideo Open-Source Video Platform](https://github.com/WWBN/AVideo)
 
