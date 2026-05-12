@@ -29,20 +29,43 @@ function loginentraGetSafeRedirectUrl($url, $webRoot) {
     if ($url === '') {
         return '';
     }
+    if (strpos($url, "\r") !== false || strpos($url, "\n") !== false) {
+        return '';
+    }
 
     // Allow relative URLs that stay within this site.
     if ($url[0] === '/') {
-        return $url;
+        return substr($url, 0, 2) === '//' ? '' : $url;
     }
 
     // Allow absolute URLs only if they match this site's host.
     $target = parse_url($url);
     $root = parse_url($webRoot);
-    if (!empty($target['host']) && !empty($root['host']) && strcasecmp($target['host'], $root['host']) === 0) {
+    if (!empty($target['host']) && !empty($root['host']) && strcasecmp($target['host'], $root['host']) === 0
+        && (empty($target['scheme']) || empty($root['scheme']) || strcasecmp($target['scheme'], $root['scheme']) === 0)) {
         return $url;
     }
 
     return '';
+}
+
+function loginentraRedirect($url) {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header("Location: {$url}", true, 302);
+
+    $escapedUrl = htmlspecialchars($url, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    echo "<!doctype html><html><head><meta charset=\"utf-8\">";
+    echo "<meta http-equiv=\"refresh\" content=\"0;url={$escapedUrl}\">";
+    echo "<script>window.location.replace(" . json_encode($url) . ");</script>";
+    echo "</head><body>";
+    echo "<a href=\"{$escapedUrl}\">Continue</a>";
+    echo "</body></html>";
+    exit;
 }
 
 function b64url_decode($data) {
@@ -122,8 +145,7 @@ if (empty($_GET['code'])) {
         'scope' => 'openid profile email',
         'state' => $state,
     ];
-    header("Location: {$authorizeUrl}?" . http_build_query($params));
-    exit;
+    loginentraRedirect($authorizeUrl . '?' . http_build_query($params));
 }
 
 // Step 2: validate state
@@ -220,6 +242,5 @@ $returnTo = loginentraGetSafeRedirectUrl($stateData['returnTo'] ?? ($_SESSION['l
 if (empty($returnTo)) {
     $returnTo = $global['webSiteRootURL'];
 }
-header("Location: {$returnTo}");
-exit;
+loginentraRedirect($returnTo);
 ?>
