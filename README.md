@@ -70,10 +70,22 @@ As I did not want to mess with the code of the main app, this plugin uses its ow
 
     var base = btn.getAttribute('href');
     var url = new URL(window.location.href);
-    var redirectUri = url.searchParams.get('redirectUri');
-
+    var redirectUri = url.searchParams.get('redirectUri') || url.searchParams.get('redirectUrl');
     var target = redirectUri ? redirectUri : url.toString();
-    btn.setAttribute('href', base + '?redirectUrl=' + encodeURIComponent(target));
+    var targetUrl = new URL(target, window.location.origin);
+
+    if (targetUrl.pathname.indexOf('/plugin/LoginEntra/') !== -1) {
+      targetUrl = new URL('/', window.location.origin);
+    }
+
+    targetUrl.searchParams.delete('code');
+    targetUrl.searchParams.delete('state');
+    targetUrl.searchParams.delete('session_state');
+    targetUrl.searchParams.delete('error');
+    targetUrl.searchParams.delete('error_description');
+    targetUrl.searchParams.delete('redirectUrl');
+
+    btn.setAttribute('href', base + '?redirectUrl=' + encodeURIComponent(targetUrl.toString()));
   })();
 </script>
 ```

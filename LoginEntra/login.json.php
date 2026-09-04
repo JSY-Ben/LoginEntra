@@ -29,6 +29,9 @@ function loginentraGetSafeRedirectUrl($url, $webRoot) {
     if ($url === '') {
         return '';
     }
+    if (strlen($url) > 2048) {
+        return '';
+    }
     if (strpos($url, "\r") !== false || strpos($url, "\n") !== false) {
         return '';
     }
@@ -47,6 +50,51 @@ function loginentraGetSafeRedirectUrl($url, $webRoot) {
     }
 
     return '';
+}
+
+function loginentraGetPath($url, $webRoot) {
+    if ($url === '') {
+        return '';
+    }
+
+    if ($url[0] === '/') {
+        $path = parse_url($url, PHP_URL_PATH);
+        return is_string($path) ? $path : '';
+    }
+
+    $target = parse_url($url);
+    $root = parse_url($webRoot);
+    if (!empty($target['host']) && !empty($root['host']) && strcasecmp($target['host'], $root['host']) === 0) {
+        return (string)($target['path'] ?? '');
+    }
+
+    return '';
+}
+
+function loginentraNormalizeReturnUrl($url, $webRoot, $depth = 0) {
+    if ($depth > 3) {
+        return '';
+    }
+
+    $url = loginentraGetSafeRedirectUrl($url, $webRoot);
+    if ($url === '') {
+        return '';
+    }
+
+    $path = loginentraGetPath($url, $webRoot);
+    $lowerPath = strtolower($path);
+    if (strpos($lowerPath, '/plugin/loginentra/') !== false) {
+        $query = parse_url($url, PHP_URL_QUERY);
+        if (!empty($query)) {
+            parse_str($query, $params);
+            if (!empty($params['redirectUrl']) && is_string($params['redirectUrl'])) {
+                return loginentraNormalizeReturnUrl($params['redirectUrl'], $webRoot, $depth + 1);
+            }
+        }
+        return '';
+    }
+
+    return $url;
 }
 
 function loginentraRedirect($url) {
@@ -120,18 +168,17 @@ function loginentraEnforceBinding($mysqli, $users_id, $oid, $tid) {
 // Step 1: start auth flow
 if (empty($_GET['code'])) {
     $csrf = bin2hex(random_bytes(16));
-    $returnTo = loginentraGetSafeRedirectUrl($_GET['redirectUrl'] ?? '', $global['webSiteRootURL']);
+    $returnTo = loginentraNormalizeReturnUrl($_GET['redirectUrl'] ?? '', $global['webSiteRootURL']);
     $_SESSION['loginentra_state_csrf'] = $csrf;
     if (!empty($returnTo)) {
         $_SESSION['loginentra_return_to'] = $returnTo;
+    } else {
+        unset($_SESSION['loginentra_return_to']);
     }
 
     $statePayload = [
         'csrf' => $csrf,
     ];
-    if (!empty($returnTo)) {
-        $statePayload['returnTo'] = $returnTo;
-    }
     $state = base64_encode(json_encode($statePayload));
 
     // IMPORTANT: do NOT request "groups" as a scope (it is not a valid v2 scope).
@@ -238,9 +285,10 @@ if (!empty($mysqli)) {
     loginentraEnforceBinding($mysqli, $users_id, $oid, $tid);
 }
 
-$returnTo = loginentraGetSafeRedirectUrl($stateData['returnTo'] ?? ($_SESSION['loginentra_return_to'] ?? ''), $global['webSiteRootURL']);
+$returnTo = loginentraNormalizeReturnUrl($_SESSION['loginentra_return_to'] ?? '', $global['webSiteRootURL']);
 if (empty($returnTo)) {
     $returnTo = $global['webSiteRootURL'];
 }
+unset($_SESSION['loginentra_return_to'], $_SESSION['loginentra_state_csrf']);
 loginentraRedirect($returnTo);
 ?>
