@@ -26,6 +26,8 @@ Remembering to 'Grant Admin Consent' for your Tenant so users aren't asked for p
 
 [Official Instructions from Microsoft on how to create an app Registration on Entra are available here](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
 
+If your AVideo site forces users to be logged in before viewing pages, make sure you are using version 1.4 or newer of this plugin. Microsoft OAuth callbacks are cross-origin requests, so the callback must be allowed to run before AVideo's normal login-required and same-domain request guards redirect the browser back to `view/user.php`.
+
 # Configuring Plugin Parameters
 
 When the plugin is installed, click 'Edit Parameters' and fill in the following config options:

@@ -1,5 +1,15 @@
 <?php
 header('Access-Control-Allow-Headers: Content-Type');
+global $global;
+if (empty($global) || !is_array($global)) {
+    $global = [];
+}
+
+// Microsoft redirects back cross-origin, so AVideo's automatic same-domain
+// CSRF guard must not block this OAuth callback before the code exchange runs.
+$global['skipAutoCSRFCheck'] = true;
+$global['ignoreUserMustBeLoggedIn'] = 1;
+
 require_once dirname(__FILE__) . '/../../videos/configuration.php';
 require_once $global['systemRootPath'] . 'objects/autoload.php';
 require_once $global['systemRootPath'] . 'objects/user.php';
